@@ -1,0 +1,5 @@
+app/config.ini
+app/rockets
+*.jpg
+venv
+.idea
