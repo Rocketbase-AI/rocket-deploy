@@ -1,5 +1,5 @@
 ### Description
-This Repository contains everything needed to host rockets inside a docker container. The [starlette](https://www.starlette.io/) server is created
+This Repository contains everything needed to host rockets inside a docker container. The [flask](http://flask.pocoo.org) server is created
 in `app/app.py`. The whole code is inspired by [fastaiv3 deployment using render](https://github.com/render-examples/fastai-v3).
 
 You need not to touch/code at all. All relevant settings can be done using a `config.ini` file. 
@@ -32,6 +32,7 @@ You should see the new container by calling:
 
 You can run the container using:
 `docker run -p 5042:5042 DOCKER_IMAGE_NAME:TAG`
+
 With `curl -X POST -F input=@office.jpg https://DOCKER_IMAGE_NAME-x7lr346vxq-uc.a.run.app/process` you can make a request to the new endpoint.
 If you get the expected response everything went fine so far.
 
