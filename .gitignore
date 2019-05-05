@@ -3,3 +3,4 @@ app/rockets
 *.jpg
 venv
 .idea
+*.png

@@ -1,10 +1,11 @@
-from flask import Flask, request
+from flask import Flask, request, send_file
 import configparser
 from PIL import Image
 import json
 import os
 import torch
 import sys
+import io
 from rocketbase import Rocket
 
 device_available = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -15,6 +16,7 @@ default_conf = config['DEFAULT']
 
 DEVICE = default_conf.get('DEVICE', device_available)
 ROCKET_URL = default_conf.get('ROCKET_URL', 'empty')
+ROCKET_FAMILY = default_conf.get('ROCKET_FAMILY', 'empty')
 PORT = int(default_conf.get('PORT', 5042))
 PORT = int(os.environ.get('PORT', PORT))
 
@@ -48,8 +50,21 @@ def process():
     with torch.no_grad():
         out_tensor = model(img_tensor)
 
-    out = model.postprocess(out_tensor, img)
-    return json.dumps(str(out))
+    if ROCKET_FAMILY in ['image_superresolution', 'image_style_transfer']:
+        out = model.postprocess(out_tensor)
+    else:
+        out = model.postprocess(out_tensor, img)
+
+    if type(out) == list:
+        return json.dumps(str(out))
+    elif "PIL" in str(type(out)):
+        img_io = io.BytesIO()
+        out.save(img_io, 'PNG')
+        img_io.seek(0)
+        return send_file(
+            filename_or_fp=img_io,
+            mimetype='image/png'
+        )
 
 
 if __name__ == '__main__':
