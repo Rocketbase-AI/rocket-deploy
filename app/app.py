@@ -5,7 +5,7 @@ import json
 import os
 import torch
 import sys
-from rockethub import Rocket
+from rocketbase import Rocket
 
 device_available = 'cuda' if torch.cuda.is_available() else 'cpu'
 
