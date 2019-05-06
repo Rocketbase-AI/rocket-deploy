@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify, make_response
 import configparser
 from PIL import Image
 import json
@@ -6,6 +6,7 @@ import os
 import torch
 import sys
 import io
+import numpy as np
 from rocketbase import Rocket
 
 device_available = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -40,6 +41,23 @@ print(f'PORT: {PORT}')
 model = init_model()
 
 
+def cast_list(input_list: list):
+    """Takes a list and casts all numpy types to python types.
+    """
+    new_list = []
+    for elem in input_list:
+        tmp_dict = {}
+        for key, val in elem.items():
+            if isinstance(val, np.floating):
+                tmp_dict[key] = float(val)
+            elif isinstance(val, np.integer):
+                tmp_dict[key] = int(val)
+            else:
+                tmp_dict[key] = val
+        new_list.append(tmp_dict)
+    return new_list
+
+
 @app.route('/process', methods=['POST'])
 def process():
     img_bytes = request.files.get('input')
@@ -56,7 +74,7 @@ def process():
         out = model.postprocess(out_tensor, img)
 
     if type(out) == list:
-        return json.dumps(str(out))
+         return jsonify(cast_list(out))
     elif "PIL" in str(type(out)):
         img_io = io.BytesIO()
         out.save(img_io, 'PNG')
