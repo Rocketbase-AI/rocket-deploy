@@ -82,7 +82,7 @@ def process():
                 out_visualization.save(temp_file, format='JPEG')
                 img_str = base64.b64encode(temp_file.getvalue()).decode('utf-8')
         else:
-            img_str = 'null'
+            img_str = None
 
         payload = {
             'output': cast_list(out),
@@ -91,13 +91,21 @@ def process():
         return jsonify(payload)
 
     elif "PIL" in str(type(out)):
-        img_io = io.BytesIO()
-        out.save(img_io, 'PNG')
-        img_io.seek(0)
-        return send_file(
-            filename_or_fp=img_io,
-            mimetype='image/png'
-        )
+        # img_io = io.BytesIO()
+        # out.save(img_io, 'PNG')
+        # img_io.seek(0)
+        # return send_file(
+        #     filename_or_fp=img_io,
+        #     mimetype='image/png'
+        # )
+        with io.BytesIO() as temp_file:
+            out.save(temp_file, format='PNG')
+            img_str = base64.b64encode(temp_file.getvalue()).decode('utf-8')
+        payload = {
+            'output': None,
+            'visualization': img_str
+        }
+        return jsonify(payload)
 
 
 if __name__ == '__main__':

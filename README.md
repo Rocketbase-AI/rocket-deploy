@@ -47,6 +47,8 @@ The amount of memory consumed will be important for creating the Google Cloud Ru
 
 ### How to deploy
 
+**Use the `deploy.py` script. It automatically loads the information from `app/config.ini` and uploads the container with the label as the tag.
+
 Now we have to tag the docker image for the google cloud engine:
 `sudo docker tag DOCKER_IMAGE_NAME:TAG gcr.io/rockethub/DOCKER_IMAGE_NAME:TAG`
 
@@ -60,7 +62,29 @@ And finally, we can push the docker image to the cloud
 *e.g. `docker push gcr.io/rockethub/rocket/igor/retinanet:0.1`*
 
 
-#### Use Kubernetes to deploy the container
+#### Update container: Rolling update using Kubernetes
+
+**Step 1:**
+Check in the container registry for the new container. Click on the icon to copy the `full image name`.
+![docker-registry](images/docker-registry.png)
+
+
+**Step 2:**
+In GKE (Google Kubernetes Engine) go to `Workloads in the left menu`. Select the api endpoint you want to update.
+Then go to `ACTIONS->Rolling Update`
+![kubernetes_rolling_update_1](images/kubernetes_rolling_update_1.png)
+
+**Step 3:**
+Finally, enter the copied `image name` from *Step 1* and click `UPDATE`.
+The whole update should take only a few seconds.
+
+![kubernetes_rolling_update_2](images/kubernetes_rolling_update_2.png)
+
+
+
+
+
+#### First time: use Kubernetes to deploy the container
 
 **Step 1:**
 
