@@ -7,6 +7,7 @@ import torch
 import sys
 import io
 import numpy as np
+import base64
 from rocketbase import Rocket
 
 device_available = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -60,8 +61,8 @@ def cast_list(input_list: list):
 
 @app.route('/process', methods=['POST'])
 def process():
+    visualize = request.form.get('visualize')
     img_bytes = request.files.get('input')
-
     img = Image.open(img_bytes)
     img_tensor = model.preprocess(img).to(DEVICE)
 
@@ -71,10 +72,24 @@ def process():
     if ROCKET_FAMILY in ['image_superresolution', 'image_style_transfer']:
         out = model.postprocess(out_tensor)
     else:
+        if visualize == 'true':
+            out_visualization = model.postprocess(out_tensor, img, visualize=True)
         out = model.postprocess(out_tensor, img)
 
     if type(out) == list:
-         return jsonify(cast_list(out))
+        if visualize == 'true':
+            with io.BytesIO() as temp_file:
+                out_visualization.save(temp_file, format='JPEG')
+                img_str = base64.b64encode(temp_file.getvalue()).decode('utf-8')
+        else:
+            img_str = 'null'
+
+        payload = {
+            'output': cast_list(out),
+            'visualization': img_str
+        }
+        return jsonify(payload)
+
     elif "PIL" in str(type(out)):
         img_io = io.BytesIO()
         out.save(img_io, 'PNG')
